@@ -12,59 +12,49 @@ export default function Home() {
   const cart = useSelector((state) => state.cart);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-6">
-      <h1 className="text-4xl font-extrabold text-center mb-8 text-blue-400">
-        🛒 Магазин
-      </h1>
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
+      <h1 className="text-3xl font-semibold mb-6">🛒 Магазин</h1>
 
-      {/* Продукты */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 w-full max-w-4xl">
         {products.map((product) => (
           <div
             key={product.id}
-            className="bg-gray-800 p-5 rounded-2xl shadow-lg hover:shadow-xl transition duration-300"
+            className="bg-gray-800 p-4 rounded-lg shadow-md flex flex-col items-center"
           >
-            <h2 className="text-2xl font-semibold">{product.name}</h2>
-            <p className="text-lg text-gray-300">${product.price}</p>
+            <h2 className="text-lg font-medium">{product.name}</h2>
+            <p className="text-gray-400">${product.price}</p>
             <button
               onClick={() => dispatch(addToCart(product))}
-              className="mt-3 bg-blue-600 px-5 py-2 rounded-lg hover:bg-blue-700 transition duration-200 shadow-md"
+              className="mt-3 bg-blue-500 px-4 py-2 rounded-md hover:bg-blue-600 transition"
             >
-              ➕ Добавить в корзину
+              ➕ Добавить
             </button>
           </div>
         ))}
       </div>
 
-      {/* Корзина */}
-      <h2 className="text-3xl font-bold mt-10 text-center text-yellow-400">
-        🛍 Корзина
-      </h2>
-      <div className="bg-gray-800 p-6 rounded-2xl shadow-lg mt-6">
+      <h2 className="text-2xl font-medium mt-8">🛍 Корзина</h2>
+      <div className="bg-gray-800 p-4 rounded-lg shadow-md mt-4 w-full max-w-4xl">
         {cart.items.length === 0 ? (
-          <p className="text-gray-400 text-center">Корзина пуста 😢</p>
+          <p className="text-gray-400 text-center">Корзина пуста</p>
         ) : (
           <>
             {cart.items.map((item) => (
               <div
                 key={item.id}
-                className="flex justify-between items-center border-b border-gray-600 py-3"
+                className="flex justify-between items-center border-b border-gray-700 py-2"
               >
-                <span className="text-lg">
-                  {item.name} x {item.quantity}
-                </span>
-                <span className="text-lg font-semibold text-green-400">
-                  ${item.price * item.quantity}
-                </span>
+                <span>{item.name} x {item.quantity}</span>
+                <span>${item.price * item.quantity}</span>
                 <button
                   onClick={() => dispatch(removeFromCart(item.id))}
-                  className="bg-red-600 px-3 py-1 rounded-lg hover:bg-red-700 transition duration-200 shadow-md"
+                  className="text-red-400 hover:text-red-500"
                 >
                   ❌
                 </button>
               </div>
             ))}
-            <h3 className="text-2xl font-semibold mt-6 text-right text-green-300">
+            <h3 className="text-lg font-medium mt-4 text-right">
               Итого: ${cart.total}
             </h3>
           </>
