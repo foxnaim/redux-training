@@ -32,14 +32,18 @@ const cartSlice = createSlice({
       }
     },
     applyDiscount: (state, action) => {
-      if (action.payload === "SALE10") {
-        state.discount = 0.1; 
-      } else if (action.payload === "Max40") {
-        state.discount = 0.2; // 20% скидка
-      } else if (action.payload === "mare") {
-        state.discount = 0.3; 
-      } else {
-        state.discount = 0; // Нет скидки
+      switch (action.payload) {
+        case "SALE10":
+          state.discount = 0.1;
+          break;
+        case "Max40":
+          state.discount = 0.2;
+          break;
+        case "mare":
+          state.discount = 0.3;
+          break;
+        default:
+          state.discount = 0;
       }
       saveCart(state);
     },
