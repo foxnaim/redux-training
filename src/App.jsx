@@ -1,9 +1,14 @@
-import React from 'react'
+import React from "react";
+import { Provider } from "react-redux";
+import { store } from "./store";
+import Home from "./page/index"; // Импортируем главный компонент
 
-
-export default function App() {
+function App() {
   return (
-    <div>App</div>
-  )
+    <Provider store={store}>
+      <Home />
+    </Provider>
+  );
 }
 
+export default App;
