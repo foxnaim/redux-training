@@ -2,10 +2,8 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const loadCart = () => {
   const cart = localStorage.getItem("cart");
-  return cart ? JSON.parse(cart) : { items: [], total: 0 };
+  return cart ? JSON.parse(cart) : { items: [], total: 0, discount: 0, currency: "USD" };
 };
-
-const initialState = loadCart();
 
 const saveCart = (state) => {
   localStorage.setItem("cart", JSON.stringify(state));
@@ -13,7 +11,7 @@ const saveCart = (state) => {
 
 const cartSlice = createSlice({
   name: "cart",
-  initialState,
+  initialState: loadCart(),
   reducers: {
     addToCart: (state, action) => {
       const item = state.items.find((i) => i.id === action.payload.id);
@@ -33,34 +31,31 @@ const cartSlice = createSlice({
         saveCart(state);
       }
     },
-    incrementQuantity: (state, action) => {
-      const item = state.items.find((i) => i.id === action.payload);
-      if (item) {
-        item.quantity += 1;
-        state.total += item.price;
-        saveCart(state);
+    applyDiscount: (state, action) => {
+      if (action.payload === "SALE10") {
+        state.discount = 0.1; 
+      } else if (action.payload === "Max40") {
+        state.discount = 0.2; // 20% скидка
+      } else if (action.payload === "mare") {
+        state.discount = 0.3; 
+      } else {
+        state.discount = 0; // Нет скидки
       }
+      saveCart(state);
     },
-    decrementQuantity: (state, action) => {
-      const item = state.items.find((i) => i.id === action.payload);
-      if (item) {
-        if (item.quantity > 1) {
-          item.quantity -= 1;
-          state.total -= item.price;
-        } else {
-          state.items = state.items.filter((i) => i.id !== action.payload);
-          state.total -= item.price;
-        }
-        saveCart(state);
-      }
-    },
-    clearCart: (state) => {
+    
+    checkout: (state) => {
       state.items = [];
       state.total = 0;
+      state.discount = 0;
+      saveCart(state);
+    },
+    setCurrency: (state, action) => {
+      state.currency = action.payload;
       saveCart(state);
     },
   },
 });
 
-export const { addToCart, removeFromCart, incrementQuantity, decrementQuantity, clearCart } = cartSlice.actions;
+export const { addToCart, removeFromCart, applyDiscount, checkout, setCurrency } = cartSlice.actions;
 export default cartSlice.reducer;
