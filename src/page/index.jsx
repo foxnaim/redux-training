@@ -1,5 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, removeFromCart, incrementQuantity, decrementQuantity, clearCart } from "../components/cartSlice";
+import { useState, useEffect } from "react";
 
 const products = [
   { id: 1, name: "iPhone 15", price: 1200 },
@@ -10,12 +11,25 @@ const products = [
 export default function Home() {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart);
+  const [addedItem, setAddedItem] = useState(null);
+
+  useEffect(() => {
+    if (addedItem) {
+      setTimeout(() => setAddedItem(null), 2000);
+    }
+  }, [addedItem]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-r from-gray-900 via-gray-800 to-gray-900 text-white p-6 flex flex-col items-center">
+    <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center relative">
       <h1 className="text-4xl font-extrabold mb-8 text-blue-400 tracking-wide">
-        🛒 Магазин
+        🛒 Магазин <span className="text-yellow-300">({cart.items.length})</span>
       </h1>
+
+      {addedItem && (
+        <div className="absolute top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-md animate-pulse">
+          ✅ {addedItem} добавлен в корзину!
+        </div>
+      )}
 
       {/* Продукты */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
@@ -27,7 +41,10 @@ export default function Home() {
             <h2 className="text-xl font-semibold">{product.name}</h2>
             <p className="text-gray-400 text-lg">${product.price}</p>
             <button
-              onClick={() => dispatch(addToCart(product))}
+              onClick={() => {
+                dispatch(addToCart(product));
+                setAddedItem(product.name);
+              }}
               className="mt-4 bg-blue-500 px-6 py-2 rounded-lg hover:bg-blue-600 transition-all duration-200 shadow-md"
             >
               ➕ Добавить
@@ -46,46 +63,21 @@ export default function Home() {
         ) : (
           <>
             {cart.items.map((item) => (
-              <div
-                key={item.id}
-                className="flex justify-between items-center border-b border-gray-700 py-3 hover:bg-gray-700 px-4 rounded-lg transition-all duration-200"
-              >
+              <div key={item.id} className="flex justify-between items-center border-b border-gray-700 py-3">
                 <span className="text-lg font-medium">{item.name}</span>
                 <div className="flex items-center space-x-3">
-                  <button
-                    onClick={() => dispatch(decrementQuantity(item.id))}
-                    className="bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-600 transition"
-                  >
-                    ➖
-                  </button>
+                  <button onClick={() => dispatch(decrementQuantity(item.id))} className="bg-gray-700 px-3 py-1 rounded-lg">➖</button>
                   <span className="text-lg font-bold">{item.quantity}</span>
-                  <button
-                    onClick={() => dispatch(incrementQuantity(item.id))}
-                    className="bg-gray-700 px-3 py-1 rounded-lg hover:bg-gray-600 transition"
-                  >
-                    ➕
-                  </button>
+                  <button onClick={() => dispatch(incrementQuantity(item.id))} className="bg-gray-700 px-3 py-1 rounded-lg">➕</button>
                 </div>
-                <span className="text-lg font-semibold text-green-400">
-                  ${item.price * item.quantity}
-                </span>
-                <button
-                  onClick={() => dispatch(removeFromCart(item.id))}
-                  className="text-red-400 hover:text-red-500 text-lg"
-                >
-                  ❌
-                </button>
+                <span className="text-lg font-semibold text-green-400">${item.price * item.quantity}</span>
+                <button onClick={() => dispatch(removeFromCart(item.id))} className="text-red-400 hover:text-red-500 text-lg">❌</button>
               </div>
             ))}
             <h3 className="text-2xl font-semibold mt-6 text-right text-green-300">
               Итого: ${cart.total}
             </h3>
-            <button
-              onClick={() => dispatch(clearCart())}
-              className="mt-4 w-full bg-red-600 px-6 py-2 rounded-lg hover:bg-red-700 transition-all duration-200 shadow-md text-white"
-            >
-              🗑 Очистить корзину
-            </button>
+            <button onClick={() => dispatch(clearCart())} className="mt-4 w-full bg-red-600 px-6 py-2 rounded-lg">🗑 Очистить корзину</button>
           </>
         )}
       </div>
