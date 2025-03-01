@@ -1,47 +1,51 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, removeFromCart, applyDiscount, checkout, setCurrency } from "../components/cartSlice";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const dispatch = useDispatch();
-  const cart = useSelector((state) => state.cart);
+  const cart = useSelector((state) => state.cart) || {};
   const [coupon, setCoupon] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(false);
 
-  const totalWithDiscount = cart.total * (1 - cart.discount);
-  const currencyRates = { USD: 1, KZT: 450, EUR: 0.9 };
-  const convertedTotal = (totalWithDiscount * currencyRates[cart.currency]).toFixed(2);
+  const exchangeRates = cart.exchangeRates || { USD: 1, KZT: 450, EUR: 0.9 };
+  const totalWithDiscount = Number(cart.total || 0) * (1 - (cart.discount || 0));
+  const convertedTotal = (totalWithDiscount * (exchangeRates[cart.currency] || 1)).toFixed(2);
+
+  useEffect(() => {
+    if (cart.currency) {
+      document.querySelector("select").value = cart.currency;
+    }
+  }, [cart.currency]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6 flex flex-col items-center">
       <h1 className="text-4xl font-extrabold mb-8 text-blue-400">
-        🛒 Магазин <span className="text-yellow-300">({cart.items.length})</span>
+        🛒 Магазин <span className="text-yellow-300">({cart.items?.length || 0})</span>
       </h1>
 
-      {/* Продукты */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 w-full max-w-5xl">
-        {[{ id: 1, name: "iPhone 15", price: 1200 }, { id: 2, name: "MacBook Air", price: 1800 },{ id: 3, name: "Ipod Air", price: 2000 } ].map((product) => (
+        {[{ id: 1, name: "iPhone 15", price: 1200 }, { id: 2, name: "MacBook Air", price: 1800 }, { id: 3, name: "Ipod Air", price: 2000 }].map((product) => (
           <div key={product.id} className="bg-gray-800 p-6 rounded-xl shadow-lg">
             <h2 className="text-xl font-semibold">{product.name}</h2>
             <p className="text-gray-400">${product.price}</p>
-            <button onClick={() => dispatch(addToCart(product))} className="mt-4 bg-blue-500 px-6 py-2 rounded-lg">
+            <button onClick={() => dispatch(addToCart({ ...product }))} className="mt-4 bg-blue-500 px-6 py-2 rounded-lg">
               ➕ Добавить
             </button>
           </div>
         ))}
       </div>
 
-      {/* Корзина */}
       <h2 className="text-3xl font-bold mt-10 text-yellow-400">🛍 Корзина</h2>
       <div className="bg-gray-800 p-6 rounded-xl mt-6 w-full max-w-5xl">
-        {cart.items.length === 0 ? (
+        {cart.items?.length === 0 ? (
           <p className="text-gray-400 text-center text-lg">Корзина пуста 😢</p>
         ) : (
           <>
             {cart.items.map((item) => (
               <div key={item.id} className="flex justify-between items-center border-b border-gray-700 py-3">
                 <span className="text-lg font-medium">{item.name} x {item.quantity}</span>
-                <span className="text-lg font-semibold text-green-400">${item.price * item.quantity}</span>
+                <span className="text-lg font-semibold text-green-400">${(item.price * item.quantity).toFixed(2)}</span>
                 <button onClick={() => dispatch(removeFromCart(item.id))} className="text-red-400">❌</button>
               </div>
             ))}
@@ -50,7 +54,6 @@ export default function Home() {
               Итого: {convertedTotal} {cart.currency}
             </h3>
 
-            {/* Купон */}
             <div className="flex mt-4">
               <input
                 type="text"
@@ -64,7 +67,6 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Выбор валюты */}
             <div className="mt-4">
               <select
                 onChange={(e) => dispatch(setCurrency(e.target.value))}
@@ -76,7 +78,6 @@ export default function Home() {
               </select>
             </div>
 
-            {/* Оплата */}
             <button
               onClick={() => {
                 dispatch(checkout());
