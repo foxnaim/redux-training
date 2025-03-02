@@ -1,20 +1,21 @@
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, removeFromCart, applyDiscount, checkout, setCurrency } from "../components/cartSlice";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const dispatch = useDispatch();
   const cart = useSelector((state) => state.cart) || {};
   const [coupon, setCoupon] = useState("");
   const [orderSuccess, setOrderSuccess] = useState(false);
+  const selectRef = useRef(null);
 
   const exchangeRates = cart.exchangeRates || { USD: 1, KZT: 450, EUR: 0.9 };
   const totalWithDiscount = Number(cart.total || 0) * (1 - (cart.discount || 0));
   const convertedTotal = (totalWithDiscount * (exchangeRates[cart.currency] || 1)).toFixed(2);
 
   useEffect(() => {
-    if (cart.currency) {
-      document.querySelector("select").value = cart.currency;
+    if (selectRef.current) {
+      selectRef.current.value = cart.currency;
     }
   }, [cart.currency]);
 
@@ -69,6 +70,7 @@ export default function Home() {
 
             <div className="mt-4">
               <select
+                ref={selectRef}
                 onChange={(e) => dispatch(setCurrency(e.target.value))}
                 className="bg-gray-700 p-2 rounded-md"
               >
